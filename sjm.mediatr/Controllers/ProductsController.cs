@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using sjm.mediatr.Commands;
+using sjm.mediatr.Notifications;
 using sjm.mediatr.Queries;
 
 namespace sjm.mediatr.Controllers
@@ -24,9 +25,18 @@ namespace sjm.mediatr.Controllers
         [HttpPost]
         public async Task<ActionResult> AddProduct([FromBody] Product product)
         {
-            await _mediator.Send(new AddProductCommand(product));
+            var productToReturn = await _mediator.Send(new AddProductCommand(product));
+            await _mediator.Publish(new ProductAddedNotification(productToReturn));
 
-            return StatusCode(201);
+            return CreatedAtRoute(nameof(GetProductById), new {id= productToReturn.Id}, productToReturn);
+        }
+
+        [HttpGet("{id:int}", Name = "GetProductById")]
+        public async Task<ActionResult> GetProductById(int id)
+        {
+            var product = await _mediator.Send(new GetProductByIdQuery(id));
+
+            return Ok(product);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace sjm.mediatr
@@ -22,5 +23,14 @@ namespace sjm.mediatr
             await Task.CompletedTask;
         }
         public async Task<IEnumerable<Product>> GetAllProducts() => await Task.FromResult(_products);
+
+        public async Task<Product> GetProductById(int id) => 
+            await Task.FromResult(_products.Single(p => p.Id == id));
+
+        public async Task EventOccurred(Product product, string evt)
+        {
+            _products.Single(p => p.Id == product.Id).Name = $"{product.Name} evt: {evt}";
+            await Task.CompletedTask;
+        }
     }
 }
